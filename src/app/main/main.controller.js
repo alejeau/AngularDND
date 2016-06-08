@@ -6,7 +6,7 @@
     .controller('MainController', MainController);
 
   /** @ngInject */
-  function MainController() {
+  function MainController(guidFactory) {
     var vm = this;
 
     // Public variables
@@ -18,12 +18,12 @@
 
     // Private variables
     const CHARS = [
-      {object: 'A', id: getGuid()}, {object: 'B', id: getGuid()}, {object: 'C', id: getGuid()}, {object: 'D', id: getGuid()}, {object: 'E', id: getGuid()},
-      {object: 'F', id: getGuid()}, {object: 'G', id: getGuid()}, {object: 'H', id: getGuid()}, {object: 'I', id: getGuid()}, {object: 'J', id: getGuid()},
-      {object: 'K', id: getGuid()}, {object: 'L', id: getGuid()}, {object: 'M', id: getGuid()}, {object: 'N', id: getGuid()}, {object: 'O', id: getGuid()},
-      {object: 'P', id: getGuid()}, {object: 'Q', id: getGuid()}, {object: 'R', id: getGuid()}, {object: 'S', id: getGuid()}, {object: 'T', id: getGuid()},
-      {object: 'U', id: getGuid()}, {object: 'V', id: getGuid()}, {object: 'W', id: getGuid()}, {object: 'X', id: getGuid()}, {object: 'Y', id: getGuid()},
-      {object: 'Z', id: getGuid()}
+      {object: 'A', id: guidFactory.getGuid()}, {object: 'B', id: guidFactory.getGuid()}, {object: 'C', id: guidFactory.getGuid()}, {object: 'D', id: guidFactory.getGuid()}, {object: 'E', id: guidFactory.getGuid()},
+      {object: 'F', id: guidFactory.getGuid()}, {object: 'G', id: guidFactory.getGuid()}, {object: 'H', id: guidFactory.getGuid()}, {object: 'I', id: guidFactory.getGuid()}, {object: 'J', id: guidFactory.getGuid()},
+      {object: 'K', id: guidFactory.getGuid()}, {object: 'L', id: guidFactory.getGuid()}, {object: 'M', id: guidFactory.getGuid()}, {object: 'N', id: guidFactory.getGuid()}, {object: 'O', id: guidFactory.getGuid()},
+      {object: 'P', id: guidFactory.getGuid()}, {object: 'Q', id: guidFactory.getGuid()}, {object: 'R', id: guidFactory.getGuid()}, {object: 'S', id: guidFactory.getGuid()}, {object: 'T', id: guidFactory.getGuid()},
+      {object: 'U', id: guidFactory.getGuid()}, {object: 'V', id: guidFactory.getGuid()}, {object: 'W', id: guidFactory.getGuid()}, {object: 'X', id: guidFactory.getGuid()}, {object: 'Y', id: guidFactory.getGuid()},
+      {object: 'Z', id: guidFactory.getGuid()}
     ];
     var numberOfElements = 5;
 
@@ -56,13 +56,6 @@
           vm.boxes.pop();
         }
       }
-    }
-
-    function getGuid() {
-      return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
-        var r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
-        return v.toString(16);
-      });
     }
   }
 })();
