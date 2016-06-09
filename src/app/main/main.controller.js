@@ -11,6 +11,8 @@
 
     // Public variables
     vm.boxes = [];
+    vm.readed = '';
+    vm.written = '';
 
     // Public functions
     vm.add = add;
@@ -18,6 +20,8 @@
     vm.dragNDropManager = dragNDropManager;
     vm.listStorageContent = listStorageContent;
     vm.clearStorageContent = clearStorageContent;
+    vm.read = read;
+    vm.write = write;
 
     // Private variables
     const CHARS = [
@@ -79,6 +83,16 @@
     function clearStorageContent() {
       $log.debug('Clearing local storage content');
       localStorageFactory.clearAll();
+    }
+
+    function read(){
+      vm.readed = localStorageFactory.getObject('UUID');
+    }
+
+    function write(){
+      // vm.written =
+      localStorageFactory.store('UUID', guidFactory.getGuid());
+      vm.written = localStorageFactory.getObject('UUID');
     }
   }
 })();

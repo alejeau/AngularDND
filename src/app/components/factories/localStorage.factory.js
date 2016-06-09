@@ -12,14 +12,15 @@
 
   angular
     .module('app')
-    .factory('localStorageFactory', ['$log', 'ngStorage', localStorageFactory]);
+    .factory('localStorageFactory', ['localStorageService', '$log', localStorageFactory]);
 
 })();
 /**
+ * @param localStorageService
  * @param $log
  * @returns {{store, storeJSONObject, storeObject: string|null, getJSONObject: JSON, remove, list: [JSON], clearAll}}
  */
-function localStorageFactory($log) {
+function localStorageFactory(localStorageService, $log) {
 
   /* ******************** */
   /* *** DECLARATIONS *** */
@@ -49,7 +50,7 @@ function localStorageFactory($log) {
    */
   function store(key, string) {
     $log.debug('[localStorageFactory] storeJSONObject');
-    localStorage.setItem(key, string);
+    localStorageService.set(key, string);
   }
 
   /**
@@ -74,7 +75,7 @@ function localStorageFactory($log) {
    * @return {string|null} A string if there is an item stored, null else.
    */
   function getObject(key) {
-    return localStorage.getItem(key);
+    return localStorageService.get(key);
   }
 
 
@@ -87,7 +88,7 @@ function localStorageFactory($log) {
    * @return {JSON} A JSON object if the object was stored as a stringifyed JSON, null else.
    */
   function getJSONObject(key) {
-    var obj = localStorage.getItem(key);
+    var obj = getObject(key);
     var json = null;
     if (obj !== null) {
       try {
@@ -108,7 +109,7 @@ function localStorageFactory($log) {
    * @description Removes the stored object with the key 'key'.
    */
   function remove(key) {
-    return localStorage.removeItem(key);
+    return localStorageService.remove(key);
   }
 
   /**
@@ -136,6 +137,6 @@ function localStorageFactory($log) {
    * @description Clears the whole local storage.
    */
   function clearAll() {
-    localStorage.clear();
+    localStorageService.clearAll();
   }
 }
