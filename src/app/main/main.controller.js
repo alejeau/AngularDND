@@ -3,10 +3,10 @@
 
   angular
     .module('angularsJs')
-    .controller('MainController', MainController);
+    .controller('MainController', ['$log', 'guidFactory', 'localStorageFactory', MainController]);
 
   /** @ngInject */
-  function MainController(guidFactory) {
+  function MainController($log, guidFactory, localStorageFactory) {
     var vm = this;
 
     // Public variables
@@ -15,6 +15,9 @@
     // Public functions
     vm.add = add;
     vm.subtract = subtract;
+    vm.dragNDropManager = dragNDropManager;
+    vm.listStorageContent = listStorageContent;
+    vm.clearStorageContent = clearStorageContent;
 
     // Private variables
     const CHARS = [
@@ -56,6 +59,26 @@
           vm.boxes.pop();
         }
       }
+    }
+
+    function dragNDropManager(first, second) {
+      $log.debug('first: ');
+      $log.debug(first);
+      $log.debug('second: ');
+      $log.debug(second);
+    }
+
+    function listStorageContent() {
+      $log.debug('Listing local storage content');
+      var content = localStorageFactory.list();
+      for (var i = 0; i < content.length; i++) {
+        $log.debug(content[i]);
+      }
+    }
+
+    function clearStorageContent() {
+      $log.debug('Clearing local storage content');
+      localStorageFactory.clearAll();
     }
   }
 })();

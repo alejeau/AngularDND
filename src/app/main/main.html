@@ -1,15 +1,16 @@
 <div class="container">
-  <button type="button" onclick="init()">init()</button>
-  <button type="button" onclick="clearAll()">clear()</button>
-  <button type="button" ng-click="localStorageFactory.list()">list()</button>
+  <button type="button" ng-click="">init()</button>
+  <button type="button" ng-click="main.clearStorageContent()">clear()</button>
+  <button type="button" ng-click="main.listStorageContent()">list()</button>
   <br>
   Number of boxes (26 max): {{main.boxes.length}}
   <button type="button" ng-click="main.add()">Add</button>
   <button type="button" ng-click="main.subtract()">Remove</button>
 <!--// cpc-drag-n-drop-->
   <div class="columns" id="columns1" ng-repeat="value in main.boxes">
-    <div class="column" draggable="true">
+    <div x-cpc-drag-n-drop manager="dragNDropManager" class="column" draggable="true">
       <div class="header">{{value.object}}</div>
+      {{value.id}}
     </div>
   </div>
 </div>

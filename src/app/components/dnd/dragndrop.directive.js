@@ -15,43 +15,60 @@
   };
 
   var ownControllerUUID = {uuid: null};
-  var cols = [document.querySelectorAll('#columns1 .column')];
+  var cols = null;
+
 
   /**
    * @name cpcDragNDrop
    * @param localStorageFactory
+   * @param guidFactory
    * @param $log
    * @param $window
    * @param $timeout
-   // * @returns {{restrict: string, link: link}}
    */
-  function cpcDragNDrop(localStorageFactory, guidFactory, $log, $window, $timeout) {//, &whatToDoAfterDragNDrop) {
+  function cpcDragNDrop($window, $timeout, $log, localStorageFactory, guidFactory) {//, &whatToDoAfterDragNDrop) {
     var directive = {
-      link: link//,
-      // scope: {
-      //   cpcDragNDrop: '=',
-      //   restrict: 'A'
-      // }
+      link: link,
+      scope: {manager: '&'}
     };
     return directive;
 
     function link($scope, $elem, attrs) {
-
+      addDNDEventListenersTo($elem);
+      if (cols === null) {
+        cols = [];
+      }
+      cols.push($elem);
+      $scope.$on('destroy', clearLocalStorage);
     }
 
-    /* ********************************** */
-    /* ****** Function declaration ****** */
-    /* ********************************** */
+    function addDNDEventListenersTo(element) {
+      $log.debug('addDNDEventListenersTo');
+      element.bind('dragstart', handleDragStart);
+      element.bind('dragenter', handleDragEnter);
+      element.bind('dragover', handleDragOver);
+      element.bind('dragleave', handleDragLeave);
+      element.bind('drop', handleDrop);
+      element.bind('dragend', handleDragEnd);
+    }
 
+    function displayStorageFile() {
+      console.log('storageFile: ');
+      var storageFile = localStorageFactory.getJSONObject(getOwn(CONST.STORAGE_FILE));
+      console.log(storageFile);
+    }
 
 // Créer des objets représentants les objets dispo avec ou non un UUID
 // Stocker le tout dans le localStorage en String JSON
 // Les manipuler par la suite
     function handleDragStart(e) {
       $log.debug('**************************handleDragStart');
+      displayStorageFile();
       var fileStorage = localStorageFactory.getJSONObject(getOwn(CONST.STORAGE_FILE));
       if (fileStorage === null) {
+        $log.debug('start init');
         init();
+        $log.debug('init done');
       }
       // Target (this) element is the source node.
       e.target.style.opacity = '0.4';
@@ -99,7 +116,7 @@
 
       // We get the object that's being dragged/dropped
       var source = localStorageFactory.getJSONObject(CONST.DRAG_EXCHANGE_FILE);
-      localStorageFactory.remove(CONST.DRAG_EXCHANGE_FILE);
+      // localStorageFactory.remove(CONST.DRAG_EXCHANGE_FILE);
       $log.debug('source');
       $log.debug(source);
 
@@ -136,24 +153,10 @@
 
     function handleDragEnd(e) { // this/e.target is the source node.
       $log.debug('**************************handleDragEnd');
+      displayStorageFile();
       if (e.dataTransfer.dropEffect !== 'none') {
         $log.debug('Waiting for json retrieval...');
         waitAndGetDropped();
-      }
-    }
-
-    function addEventListeners() {
-      $log.debug('addEventListeners');
-      var i, j;
-      for (i = 0; i < cols.length; i++) {
-        for (j = 0; j < cols[i].length; j++) {
-          cols[i][j].addEventListener('dragstart', handleDragStart, false);
-          cols[i][j].addEventListener('dragenter', handleDragEnter, false);
-          cols[i][j].addEventListener('dragover', handleDragOver, false);
-          cols[i][j].addEventListener('dragleave', handleDragLeave, false);
-          cols[i][j].addEventListener('drop', handleDrop, false);
-          cols[i][j].addEventListener('dragend', handleDragEnd, false);
-        }
       }
     }
 
@@ -161,7 +164,6 @@
     function init() {
       $log.debug('init');
       ownControllerUUID.uuid = guidFactory.getGuid();
-      addEventListeners();
 
       var fileStorage = [];
       var linearColumns = [];
@@ -236,7 +238,7 @@
       $log.debug('innerHTML');
       $log.debug(innerHTML);
       $log.debug('against: ');
-      var fileStorage = getJson(getOwn(CONST.STORAGE_FILE));
+      var fileStorage = localStorageFactory.getJSONObject(getOwn(CONST.STORAGE_FILE));
       var i;
       for (i = 0; i < fileStorage.length; i++) {
         $log.debug(fileStorage[i]);
@@ -286,8 +288,16 @@
       $log.debug('new json');
       $log.debug(json);
       updateFileStorageAndLinearColumns(colNum, json);
+      // localStorageFactory.remove(CONST.DROP_EXCHANGE_FILE);
+      // var first = localStorageFactory.getJSONObject(CONST.DRAG_EXCHANGE_FILE);
+      // $scope.manager.apply(first, json);
+    }
+
+    function clearLocalStorage() {
+      localStorageFactory.remove(CONST.DRAG_EXCHANGE_FILE);
       localStorageFactory.remove(CONST.DROP_EXCHANGE_FILE);
+      localStorageFactory.remove(getOwn(CONST.LINEAR_COLUMNS));
+      localStorageFactory.remove(getOwn(CONST.STORAGE_FILE));
     }
   }
-
 })();
