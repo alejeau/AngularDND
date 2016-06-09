@@ -8,7 +8,7 @@
   <button type="button" ng-click="main.subtract()">Remove</button>
 <!--// cpc-drag-n-drop-->
   <div class="columns" id="columns1" ng-repeat="value in main.boxes">
-    <div x-cpc-drag-n-drop manager="dragNDropManager" class="column" draggable="true">
+    <div x-cpc-drag-n-drop manager="main.dragNDropManager" class="column" draggable="true">
       <div class="header">{{value.object}}</div>
       {{value.id}}
     </div>

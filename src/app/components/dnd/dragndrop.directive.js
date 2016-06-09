@@ -5,7 +5,7 @@
   'use strict';
   angular
     .module('angularsJs')
-    .directive('cpcDragNDrop', ['$window', '$timeout', '$log', 'localStorageFactory', 'guidFactory', cpcDragNDrop]);
+    .directive('cpcDragNDrop', ['$log', 'localStorageFactory', 'guidFactory', cpcDragNDrop]);
 
   const CONST = {
     DRAG_EXCHANGE_FILE: 'dragExchangeFile',
@@ -16,17 +16,16 @@
 
   var ownControllerUUID = {uuid: null};
   var cols = null;
+  var callback;
 
 
   /**
    * @name cpcDragNDrop
+   * @param $log
    * @param localStorageFactory
    * @param guidFactory
-   * @param $log
-   * @param $window
-   * @param $timeout
    */
-  function cpcDragNDrop($window, $timeout, $log, localStorageFactory, guidFactory) {//, &whatToDoAfterDragNDrop) {
+  function cpcDragNDrop($log, localStorageFactory, guidFactory) {//, &whatToDoAfterDragNDrop) {
     var directive = {
       link: link,
       scope: {manager: '&'}
@@ -39,6 +38,7 @@
         cols = [];
       }
       cols.push($elem);
+      callback = $scope.manager;
       $scope.$on('destroy', clearLocalStorage);
     }
 
@@ -289,8 +289,10 @@
       $log.debug(json);
       updateFileStorageAndLinearColumns(colNum, json);
       // localStorageFactory.remove(CONST.DROP_EXCHANGE_FILE);
-      // var first = localStorageFactory.getJSONObject(CONST.DRAG_EXCHANGE_FILE);
+      var first = localStorageFactory.getJSONObject(CONST.DRAG_EXCHANGE_FILE);
       // $scope.manager.apply(first, json);
+      callback(first, json)();
+      // $scope.manager.apply(null, [$scope.args].concat([first, json]));
     }
 
     function clearLocalStorage() {
