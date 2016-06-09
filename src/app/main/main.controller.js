@@ -2,7 +2,7 @@
   'use strict';
 
   angular
-    .module('angularsJs')
+    .module('app')
     .controller('MainController', ['$log', 'guidFactory', 'localStorageFactory', MainController]);
 
   /** @ngInject */

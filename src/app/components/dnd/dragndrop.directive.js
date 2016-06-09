@@ -4,7 +4,7 @@
 (function () {
   'use strict';
   angular
-    .module('angularsJs')
+    .module('app')
     .directive('cpcDragNDrop', ['$log', 'localStorageFactory', 'guidFactory', cpcDragNDrop]);
 
   const CONST = {
@@ -16,7 +16,7 @@
 
   var ownControllerUUID = {uuid: null};
   var cols = null;
-  var callback;
+  var callback, callbackArgs;
 
 
   /**
@@ -39,7 +39,8 @@
       }
       cols.push($elem);
       callback = $scope.manager;
-      $scope.$on('destroy', clearLocalStorage);
+      callbackArgs = $scope.args;
+      // $scope.$on('destroy', clearLocalStorage);
     }
 
     function addDNDEventListenersTo(element) {
@@ -66,9 +67,7 @@
       displayStorageFile();
       var fileStorage = localStorageFactory.getJSONObject(getOwn(CONST.STORAGE_FILE));
       if (fileStorage === null) {
-        $log.debug('start init');
         init();
-        $log.debug('init done');
       }
       // Target (this) element is the source node.
       e.target.style.opacity = '0.4';
@@ -91,6 +90,10 @@
       $log.debug('**************************handleDragEnter');
       // this / e.target is the current hover target.
       e.target.classList.add('over');
+      var fileStorage = localStorageFactory.getJSONObject(getOwn(CONST.STORAGE_FILE));
+      if (fileStorage === null) {
+        init();
+      }
     }
 
     function handleDragOver(e) {
@@ -110,45 +113,52 @@
 
     function handleDrop(e) { // this/e.target is current target element.
       $log.debug('**************************handleDrop');
-      if (e.stopPropagation) {
-        e.stopPropagation(); // Stops some browsers from redirecting.
-      }
+      setTimeout(function () {
+        if (e.stopPropagation) {
+          e.stopPropagation(); // Stops some browsers from redirecting.
+        }
 
-      // We get the object that's being dragged/dropped
-      var source = localStorageFactory.getJSONObject(CONST.DRAG_EXCHANGE_FILE);
-      // localStorageFactory.remove(CONST.DRAG_EXCHANGE_FILE);
-      $log.debug('source');
-      $log.debug(source);
-
-      if (source === null) {
-        $log.debug('source is null!');
-      }
-
-      // Do nothing if dropping the same column we're dragging.
-      if (e.target.innerHTML !== source.body) {
-        var target = findObjectViaInnerHTML(e.target.innerHTML);
-        var colNumTarget = getColNumOfObject(target);
-
-        // We keep the target's body
-        var tmp = target.body;
-        // We swap
-        e.target.innerHTML = source.body;
-        target.body = source.body;
-
-        // We set a new UUID
-        target.uuid = guidFactory.getGuid();
-
-        // We update the target
-        updateFileStorageAndLinearColumns(colNumTarget, target);
-
-        // We update the source
-        source.body = tmp;
-        $log.debug('new source');
+        // We get the object that's being dragged/dropped
+        var source = localStorageFactory.getJSONObject(CONST.DRAG_EXCHANGE_FILE);
+        // localStorageFactory.remove(CONST.DRAG_EXCHANGE_FILE);
+        $log.debug('source');
         $log.debug(source);
-        // We save the modifications
-        localStorageFactory.storeJSONObject(CONST.DROP_EXCHANGE_FILE, source);
-      }
-      return false;
+
+        if (source === null) {
+          $log.debug('source is null!');
+        }
+
+        $log.debug('e.target.innerHTML');
+        $log.debug(e.target.innerHTML);
+        $log.debug('source.body');
+        $log.debug(source.body);
+
+        // Do nothing if dropping the same column we're dragging.
+        if (e.target.innerHTML !== source.body) {
+          var target = findObjectViaInnerHTML(e.target.innerHTML);
+          var colNumTarget = getColNumOfObject(target);
+
+          // We keep the target's body
+          var tmp = target.body;
+          // We swap
+          e.target.innerHTML = source.body;
+          target.body = source.body;
+
+          // We set a new UUID
+          target.uuid = guidFactory.getGuid();
+
+          // We update the target
+          updateFileStorageAndLinearColumns(colNumTarget, target);
+
+          // We update the source
+          source.body = tmp;
+          $log.debug('new source');
+          $log.debug(source);
+          // We save the modifications
+          localStorageFactory.storeJSONObject(CONST.DROP_EXCHANGE_FILE, source);
+        }
+        return false;
+      }, 1000);
     }
 
     function handleDragEnd(e) { // this/e.target is the source node.
@@ -263,36 +273,13 @@
           clearInterval(launcher);
           getThatDroppedBeat(json);
         }
-      }, 100);
+      }, 100, 10);
     }
 
     function getThatDroppedBeat(json) {
-      $log.debug('getThatDroppedBeat');
-      $log.debug('json');
-      $log.debug(json);
-
-      // We get the objects column's number
-      var colNum = getColNumOfObject(json);
-
-      // Remplacer directement dans linearColumns
-      for (var i = 0; i < cols.length; i++) {
-        for (var j = 0; j < cols[i].length; j++) {
-          if (i * j + j === colNum) {
-            cols[i][j].innerHTML = json.body;
-            cols[i][j].style.opacity = '1';
-          }
-        }
-      }
-
-      json.uuid = guidFactory.getGuid();
-      $log.debug('new json');
-      $log.debug(json);
       updateFileStorageAndLinearColumns(colNum, json);
-      // localStorageFactory.remove(CONST.DROP_EXCHANGE_FILE);
       var first = localStorageFactory.getJSONObject(CONST.DRAG_EXCHANGE_FILE);
-      // $scope.manager.apply(first, json);
-      callback(first, json)();
-      // $scope.manager.apply(null, [$scope.args].concat([first, json]));
+      callback()(first, json);
     }
 
     function clearLocalStorage() {

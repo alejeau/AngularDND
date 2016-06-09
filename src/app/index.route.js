@@ -2,7 +2,7 @@
   'use strict';
 
   angular
-    .module('angularsJs')
+    .module('app')
     .config(routeConfig);
 
   function routeConfig($routeProvider) {

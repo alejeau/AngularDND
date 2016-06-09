@@ -10,7 +10,7 @@
 (function () {
   'use strict';
   angular
-    .module('angularsJs')
+    .module('app')
     .factory('guidFactory', ['$log', guidFactory]);
 
   /**

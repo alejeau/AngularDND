@@ -2,6 +2,6 @@
   'use strict';
 
   angular
-    .module('angularsJs', ['ngResource', 'ngRoute', 'toastr']);
+    .module('app', ['ngResource', 'ngRoute', 'toastr']);
 
 })();
