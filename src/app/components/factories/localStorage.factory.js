@@ -63,7 +63,6 @@
     function storeJSONObject(key, json) {
       $log.debug('[localStorageFactory] storeJSONObject');
       store(key, JSON.stringify(json));
-      // store(key, json.toJson());
     }
 
     /**
