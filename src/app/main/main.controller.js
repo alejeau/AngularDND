@@ -54,12 +54,13 @@
 
     function updateBoxes() {
       var len = vm.boxes.length;
+      var i;
       if (numberOfElements > len) {
-        for (var i = len; i < numberOfElements; i++) {
+        for (i = len; i < numberOfElements; i++) {
           vm.boxes.push(CHARS[i]);
         }
       } else {
-        for (var i = len-1; i >= numberOfElements; i--) {
+        for (i = len-1; i >= numberOfElements; i--) {
           vm.boxes.pop();
         }
       }
