@@ -1,12 +1,13 @@
-(function () {
+(function (ng) {
   'use strict';
 
-  angular
+  ng
     .module('app')
-    .controller('MainController', ['$log', 'guidFactory', 'localStorageFactory', MainController]);
+    .controller('MainController', MainController);
 
+  MainController.$inject = ['$scope', '$log', 'guidFactory', 'localStorageFactory'];
   /** @ngInject */
-  function MainController($log, guidFactory, localStorageFactory) {
+  function MainController($scope, $log, guidFactory, localStorageFactory) {
     var vm = this;
 
     // Public variables
@@ -22,15 +23,17 @@
     vm.clearStorageContent = clearStorageContent;
     vm.read = read;
     vm.write = write;
+    vm.source = null;
+    vm.target = null;
 
     // Private variables
-    const CHARS = [
-      {object: 'A', uuid: guidFactory.getGuid()}, {object: 'B', uuid: guidFactory.getGuid()}, {object: 'C', uuid: guidFactory.getGuid()}, {object: 'D', uuid: guidFactory.getGuid()}, {object: 'E', uuid: guidFactory.getGuid()},
-      {object: 'F', uuid: guidFactory.getGuid()}, {object: 'G', uuid: guidFactory.getGuid()}, {object: 'H', uuid: guidFactory.getGuid()}, {object: 'I', uuid: guidFactory.getGuid()}, {object: 'J', uuid: guidFactory.getGuid()},
-      {object: 'K', uuid: guidFactory.getGuid()}, {object: 'L', uuid: guidFactory.getGuid()}, {object: 'M', uuid: guidFactory.getGuid()}, {object: 'N', uuid: guidFactory.getGuid()}, {object: 'O', uuid: guidFactory.getGuid()},
-      {object: 'P', uuid: guidFactory.getGuid()}, {object: 'Q', uuid: guidFactory.getGuid()}, {object: 'R', uuid: guidFactory.getGuid()}, {object: 'S', uuid: guidFactory.getGuid()}, {object: 'T', uuid: guidFactory.getGuid()},
-      {object: 'U', uuid: guidFactory.getGuid()}, {object: 'V', uuid: guidFactory.getGuid()}, {object: 'W', uuid: guidFactory.getGuid()}, {object: 'X', uuid: guidFactory.getGuid()}, {object: 'Y', uuid: guidFactory.getGuid()},
-      {object: 'Z', uuid: guidFactory.getGuid()}
+    var CHARS = [
+      {body: 'A', uuid: guidFactory.getGuid()}, {body: 'B', uuid: guidFactory.getGuid()}, {body: 'C', uuid: guidFactory.getGuid()}, {body: 'D', uuid: guidFactory.getGuid()}, {body: 'E', uuid: guidFactory.getGuid()},
+      {body: 'F', uuid: guidFactory.getGuid()}, {body: 'G', uuid: guidFactory.getGuid()}, {body: 'H', uuid: guidFactory.getGuid()}, {body: 'I', uuid: guidFactory.getGuid()}, {body: 'J', uuid: guidFactory.getGuid()},
+      {body: 'K', uuid: guidFactory.getGuid()}, {body: 'L', uuid: guidFactory.getGuid()}, {body: 'M', uuid: guidFactory.getGuid()}, {body: 'N', uuid: guidFactory.getGuid()}, {body: 'O', uuid: guidFactory.getGuid()},
+      {body: 'P', uuid: guidFactory.getGuid()}, {body: 'Q', uuid: guidFactory.getGuid()}, {body: 'R', uuid: guidFactory.getGuid()}, {body: 'S', uuid: guidFactory.getGuid()}, {body: 'T', uuid: guidFactory.getGuid()},
+      {body: 'U', uuid: guidFactory.getGuid()}, {body: 'V', uuid: guidFactory.getGuid()}, {body: 'W', uuid: guidFactory.getGuid()}, {body: 'X', uuid: guidFactory.getGuid()}, {body: 'Y', uuid: guidFactory.getGuid()},
+      {body: 'Z', uuid: guidFactory.getGuid()}
     ];
     var numberOfElements = 5;
 
@@ -67,10 +70,33 @@
     }
 
     function dragNDropManager(source, target) {
+      vm.source = source;
+      vm.target = target;
       $log.debug('source: ');
       $log.debug(source);
       $log.debug('target: ');
       $log.debug(target);
+      var sourceRank = -1, targetRank = -1;
+      for (var i = 0; i < vm.boxes.length; i++) {
+        if (vm.boxes[i].uuid === source.uuid) {
+          $log.debug('Matching source!');
+          sourceRank = i;
+        } else if (vm.boxes[i].uuid === target.uuid) {
+          $log.debug('Matching target!');
+          targetRank = i;
+        }
+      }
+
+      if (sourceRank !== -1) {
+        $log.debug('Changing source!');
+        vm.boxes[sourceRank] = target;
+      }
+
+      if (targetRank !== -1) {
+        $log.debug('Changing target!');
+        vm.boxes[targetRank] = source;
+      }
+      $scope.$apply();
     }
 
     function listStorageContent() {
@@ -95,4 +121,4 @@
       vm.written = localStorageFactory.getObject('UUID_FIELD');
     }
   }
-})();
+})(angular);

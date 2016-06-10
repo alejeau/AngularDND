@@ -15,11 +15,8 @@
 <!--// cpc-drag-n-drop-->
   <div class="columns" id="columns1" ng-repeat="value in main.boxes">
     <div x-cpc-drag-n-drop manager="main.dragNDropManager" class="column" draggable="true">
-      <div class="header">{{value.object}}</div>
-      uuid:{{value.uuid}}
+      <div class="header">{{value.body}}</div>
+      <uuid>{{value.uuid}}</uuid>
     </div>
   </div>
 </div>
-
-
-<!--<script src="scripts/dnd.v2.js" type="text/javascript"></script>-->

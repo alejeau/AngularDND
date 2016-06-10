@@ -7,12 +7,13 @@
  * @description Allows for the use of guid.
  **/
 
-(function () {
+(function (ng) {
   'use strict';
-  angular
+  ng
     .module('app')
-    .factory('guidFactory', ['$log', guidFactory]);
+    .factory('guidFactory', guidFactory);
 
+  guidFactory.$inject = ['$log'];
   /**
    * @returns {{string}}
    */
@@ -34,4 +35,4 @@
       });
     }
   }
-})();
+})(angular);
