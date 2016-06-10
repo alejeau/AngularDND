@@ -5,42 +5,39 @@
   'use strict';
   angular
     .module('app')
-    .directive('cpcDragNDrop', ['$log', 'localStorageFactory', 'guidFactory', cpcDragNDrop]);
+    .directive('cpcDragNDrop', ['$log', 'localStorageFactory', cpcDragNDrop]);
 
   const CONST = {
     DRAG_EXCHANGE_FILE: 'dragExchangeFile',
     DROP_EXCHANGE_FILE: 'dropExchangeFile',
-    STORAGE_FILE: 'storageFile',
-    LINEAR_COLUMNS: 'linearColumns'
+    UUID_FIELD: 'uuid:'
   };
 
   var ownControllerUUID = {uuid: null};
   var cols = null;
-  var callback, callbackArgs;
+  var callback;
 
 
   /**
    * @name cpcDragNDrop
    * @param $log
    * @param localStorageFactory
-   * @param guidFactory
    */
-  function cpcDragNDrop($log, localStorageFactory, guidFactory) {//, &whatToDoAfterDragNDrop) {
+  function cpcDragNDrop($log, localStorageFactory) {
     var directive = {
       link: link,
       scope: {manager: '&'}
     };
     return directive;
 
-    function link($scope, $elem, attrs) {
+    function link($scope, $elem) {
       addDNDEventListenersTo($elem);
       if (cols === null) {
         cols = [];
       }
       cols.push($elem);
       callback = $scope.manager;
-      callbackArgs = $scope.args;
-      // $scope.$on('destroy', clearLocalStorage);
+      $scope.$on('destroy', clearLocalStorage);
     }
 
     function addDNDEventListenersTo(element) {
@@ -53,30 +50,13 @@
       element.bind('dragend', handleDragEnd);
     }
 
-    function displayStorageFile() {
-      console.log('storageFile: ');
-      var storageFile = localStorageFactory.getJSONObject(getOwn(CONST.STORAGE_FILE));
-      console.log(storageFile);
-    }
-
-// Créer des objets représentants les objets dispo avec ou non un UUID
-// Stocker le tout dans le localStorage en String JSON
-// Les manipuler par la suite
     function handleDragStart(e) {
-      $log.debug('**************************handleDragStart');
-      displayStorageFile();
-      var fileStorage = localStorageFactory.getJSONObject(getOwn(CONST.STORAGE_FILE));
-      if (fileStorage === null) {
-        init();
-      }
       // Target (this) element is the source node.
       e.target.style.opacity = '0.4';
       e.dataTransfer.effectAllowed = 'move';
 
-      var json = findObjectViaInnerHTML(e.target.innerHTML);
-      $log.debug('object found:');
-      $log.debug(json);
-      localStorageFactory.storeJSONObject(CONST.DRAG_EXCHANGE_FILE, json);
+      var drag = getJSONFromElement(e);
+      localStorageFactory.storeJSONObject(CONST.DRAG_EXCHANGE_FILE, drag);
     }
 
     /**
@@ -87,17 +67,11 @@
      * Keeping redraws to a minimum is always a good idea.
      */
     function handleDragEnter(e) {
-      $log.debug('**************************handleDragEnter');
       // this / e.target is the current hover target.
       e.target.classList.add('over');
-      var fileStorage = localStorageFactory.getJSONObject(getOwn(CONST.STORAGE_FILE));
-      if (fileStorage === null) {
-        init();
-      }
     }
 
     function handleDragOver(e) {
-      $log.debug('**************************handleDragOver');
       if (e.preventDefault) {
         // Prevents the default behavior of a browser; for instance preventing link opening to allow the DnD.
         e.preventDefault();
@@ -107,186 +81,55 @@
     }
 
     function handleDragLeave(e) {
-      $log.debug('**************************handleDragLeave');
       e.target.classList.remove('over');  // this / e.target is previous target element.
     }
 
     function handleDrop(e) { // this/e.target is current target element.
-      $log.debug('**************************handleDrop');
-      setTimeout(function () {
-        if (e.stopPropagation) {
-          e.stopPropagation(); // Stops some browsers from redirecting.
-        }
+      if (e.stopPropagation) {
+        // Stops some browsers from redirecting when the object's dropped.
+        e.stopPropagation();
+      }
 
-        // We get the object that's being dragged/dropped
-        var source = localStorageFactory.getJSONObject(CONST.DRAG_EXCHANGE_FILE);
-        // localStorageFactory.remove(CONST.DRAG_EXCHANGE_FILE);
-        $log.debug('source');
-        $log.debug(source);
-
-        if (source === null) {
-          $log.debug('source is null!');
-        }
-
-        $log.debug('e.target.innerHTML');
-        $log.debug(e.target.innerHTML);
-        $log.debug('source.body');
-        $log.debug(source.body);
+      e.target.classList.remove('over');  // this / e.target is previous target element.
+      // We get the object that's being dragged
+      var source = localStorageFactory.getJSONObject(CONST.DRAG_EXCHANGE_FILE);
+      if (source === null) {
+        $log.warn('source is null!');
+      } else {
+        var target = getJSONFromElement(e);
 
         // Do nothing if dropping the same column we're dragging.
-        if (e.target.innerHTML !== source.body) {
-          var target = findObjectViaInnerHTML(e.target.innerHTML);
-          var colNumTarget = getColNumOfObject(target);
-
-          // We keep the target's body
-          var tmp = target.body;
-          // We swap
-          e.target.innerHTML = source.body;
-          target.body = source.body;
-
-          // We set a new UUID
-          target.uuid = guidFactory.getGuid();
-
-          // We update the target
-          updateFileStorageAndLinearColumns(colNumTarget, target);
-
-          // We update the source
-          source.body = tmp;
-          $log.debug('new source');
-          $log.debug(source);
-          // We save the modifications
-          localStorageFactory.storeJSONObject(CONST.DROP_EXCHANGE_FILE, source);
+        if (target.uuid !== source.uuid) {
+          localStorageFactory.storeJSONObject(CONST.DROP_EXCHANGE_FILE, target);
         }
-        return false;
-      }, 1000);
+      }
+      return false;
     }
 
     function handleDragEnd(e) { // this/e.target is the source node.
-      $log.debug('**************************handleDragEnd');
-      displayStorageFile();
+      e.target.classList.remove('move');
+      e.target.classList.remove('over');
+      e.target.style.opacity = '1.0';
       if (e.dataTransfer.dropEffect !== 'none') {
-        $log.debug('Waiting for json retrieval...');
-        waitAndGetDropped();
-      }
-    }
-
-// Gets the original objects
-    function init() {
-      $log.debug('init');
-      ownControllerUUID.uuid = guidFactory.getGuid();
-
-      var fileStorage = [];
-      var linearColumns = [];
-
-      // populating fileStorage and linearColumns
-      var i, j, tmp;
-      for (i = 0; i < cols.length; i++) {
-        for (j = 0; j < cols[i].length; j++) {
-          tmp = {uuid: guidFactory.getGuid(), body: cols[i][j].innerHTML};
-          fileStorage.push(tmp);
-          var col = i * j + j;
-          linearColumns.push({colNum: col, uuid: tmp.uuid});
+        var source = localStorageFactory.getJSONObject(CONST.DRAG_EXCHANGE_FILE);
+        localStorageFactory.remove(CONST.DRAG_EXCHANGE_FILE);
+        var target = localStorageFactory.getJSONObject(CONST.DROP_EXCHANGE_FILE);
+        if ((target !== null) && (target.uuid !== source.uuid)) {
+          callback()(source, target);
+          localStorageFactory.remove(CONST.DROP_EXCHANGE_FILE);
         }
       }
-      // Storing fileStorage in the local storage
-      localStorageFactory.storeJSONObject(getOwn(CONST.STORAGE_FILE), fileStorage);
-      localStorageFactory.storeJSONObject(getOwn(CONST.LINEAR_COLUMNS), linearColumns);
-
     }
 
-    /**
-     * @param json {JSON}
-     * @return {number}
-     */
-    function getColNumOfObject(json) {
-      var linearColumns = localStorageFactory.getJSONObject(getOwn(CONST.LINEAR_COLUMNS));
-      for (var i = 0; i < linearColumns.length; i++) {
-        if (linearColumns[i].uuid === json.uuid) {
-          return i;
-        }
-      }
-      return -1;
-    }
-
-    function updateFileStorageAndLinearColumns(colNum, objToUpdate) {
-      // getting the files fomr the local storage
-      var fileStorage = localStorageFactory.getJSONObject(getOwn(CONST.STORAGE_FILE));
-      var linearColumns = localStorageFactory.getJSONObject(getOwn(CONST.LINEAR_COLUMNS));
-
-      // updating...
-      fileStorage[colNum] = objToUpdate;
-      linearColumns[colNum] = objToUpdate;
-
-      // Storing in the local storage
-      localStorageFactory.storeJSONObject(getOwn(CONST.STORAGE_FILE), fileStorage);
-      localStorageFactory.storeJSONObject(getOwn(CONST.LINEAR_COLUMNS), linearColumns);
-    }
-
-    function updateFileStorage(json) {
-      $log.debug('updateFileStorage');
-      var fileStorage = localStorageFactory.localStorageFactory.getJSONObjectObject(getOwn(CONST.STORAGE_FILE));
-
-      // populating fileStorage
-      var i;
-      for (i = 0; i < cols.length; i++) {
-        if (fileStorage[i].uuid === json.uuid) {
-          fileStorage[i].uuid = guidFactory.getGuid();
-          fileStorage[i].body = json.body;
-          break;
-        }
-      }
-
-      // Storing fileStorage in the local storage
-      localStorageFactory.storeJSONObject(getOwn(CONST.STORAGE_FILE), fileStorage);
-    }
-
-    /**
-     * @return {JSON} the JSON object if found, null else
-     */
-    function findObjectViaInnerHTML(innerHTML) {
-      $log.debug('findObjectViaInnerHTML');
-      $log.debug('innerHTML');
-      $log.debug(innerHTML);
-      $log.debug('against: ');
-      var fileStorage = localStorageFactory.getJSONObject(getOwn(CONST.STORAGE_FILE));
-      var i;
-      for (i = 0; i < fileStorage.length; i++) {
-        $log.debug(fileStorage[i]);
-        if (fileStorage[i].body.indexOf(innerHTML) !== -1) {
-          return fileStorage[i];
-        }
-      }
-      return null;
-    }
-
-    function getOwn(field) {
-      $log.debug('getOwn');
-      return field + ownControllerUUID.uuid;
-    }
-
-    function waitAndGetDropped() {
-      $log.debug('waitAndGetDropped');
-      var launcher = setInterval(function () {
-        $log.debug('wait');
-        var json = localStorageFactory.getJSONObject(CONST.DROP_EXCHANGE_FILE);
-        if (json !== null && json !== undefined) {
-          clearInterval(launcher);
-          getThatDroppedBeat(json);
-        }
-      }, 100, 10);
-    }
-
-    function getThatDroppedBeat(json) {
-      updateFileStorageAndLinearColumns(colNum, json);
-      var first = localStorageFactory.getJSONObject(CONST.DRAG_EXCHANGE_FILE);
-      callback()(first, json);
+    function getJSONFromElement(e) {
+      var indexOfUUID = e.target.innerHTML.indexOf(CONST.UUID_FIELD);
+      var str = e.target.innerHTML.substring(indexOfUUID);
+      return {uuid: str, body: e.target.innerHTML};
     }
 
     function clearLocalStorage() {
       localStorageFactory.remove(CONST.DRAG_EXCHANGE_FILE);
       localStorageFactory.remove(CONST.DROP_EXCHANGE_FILE);
-      localStorageFactory.remove(getOwn(CONST.LINEAR_COLUMNS));
-      localStorageFactory.remove(getOwn(CONST.STORAGE_FILE));
     }
   }
 })();

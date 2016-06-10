@@ -16,7 +16,7 @@
   <div class="columns" id="columns1" ng-repeat="value in main.boxes">
     <div x-cpc-drag-n-drop manager="main.dragNDropManager" class="column" draggable="true">
       <div class="header">{{value.object}}</div>
-      {{value.id}}
+      uuid:{{value.uuid}}
     </div>
   </div>
 </div>

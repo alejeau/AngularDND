@@ -25,12 +25,12 @@
 
     // Private variables
     const CHARS = [
-      {object: 'A', id: guidFactory.getGuid()}, {object: 'B', id: guidFactory.getGuid()}, {object: 'C', id: guidFactory.getGuid()}, {object: 'D', id: guidFactory.getGuid()}, {object: 'E', id: guidFactory.getGuid()},
-      {object: 'F', id: guidFactory.getGuid()}, {object: 'G', id: guidFactory.getGuid()}, {object: 'H', id: guidFactory.getGuid()}, {object: 'I', id: guidFactory.getGuid()}, {object: 'J', id: guidFactory.getGuid()},
-      {object: 'K', id: guidFactory.getGuid()}, {object: 'L', id: guidFactory.getGuid()}, {object: 'M', id: guidFactory.getGuid()}, {object: 'N', id: guidFactory.getGuid()}, {object: 'O', id: guidFactory.getGuid()},
-      {object: 'P', id: guidFactory.getGuid()}, {object: 'Q', id: guidFactory.getGuid()}, {object: 'R', id: guidFactory.getGuid()}, {object: 'S', id: guidFactory.getGuid()}, {object: 'T', id: guidFactory.getGuid()},
-      {object: 'U', id: guidFactory.getGuid()}, {object: 'V', id: guidFactory.getGuid()}, {object: 'W', id: guidFactory.getGuid()}, {object: 'X', id: guidFactory.getGuid()}, {object: 'Y', id: guidFactory.getGuid()},
-      {object: 'Z', id: guidFactory.getGuid()}
+      {object: 'A', uuid: guidFactory.getGuid()}, {object: 'B', uuid: guidFactory.getGuid()}, {object: 'C', uuid: guidFactory.getGuid()}, {object: 'D', uuid: guidFactory.getGuid()}, {object: 'E', uuid: guidFactory.getGuid()},
+      {object: 'F', uuid: guidFactory.getGuid()}, {object: 'G', uuid: guidFactory.getGuid()}, {object: 'H', uuid: guidFactory.getGuid()}, {object: 'I', uuid: guidFactory.getGuid()}, {object: 'J', uuid: guidFactory.getGuid()},
+      {object: 'K', uuid: guidFactory.getGuid()}, {object: 'L', uuid: guidFactory.getGuid()}, {object: 'M', uuid: guidFactory.getGuid()}, {object: 'N', uuid: guidFactory.getGuid()}, {object: 'O', uuid: guidFactory.getGuid()},
+      {object: 'P', uuid: guidFactory.getGuid()}, {object: 'Q', uuid: guidFactory.getGuid()}, {object: 'R', uuid: guidFactory.getGuid()}, {object: 'S', uuid: guidFactory.getGuid()}, {object: 'T', uuid: guidFactory.getGuid()},
+      {object: 'U', uuid: guidFactory.getGuid()}, {object: 'V', uuid: guidFactory.getGuid()}, {object: 'W', uuid: guidFactory.getGuid()}, {object: 'X', uuid: guidFactory.getGuid()}, {object: 'Y', uuid: guidFactory.getGuid()},
+      {object: 'Z', uuid: guidFactory.getGuid()}
     ];
     var numberOfElements = 5;
 
@@ -66,11 +66,11 @@
       }
     }
 
-    function dragNDropManager(first, second) {
-      $log.debug('first: ');
-      $log.debug(first);
-      $log.debug('second: ');
-      $log.debug(second);
+    function dragNDropManager(source, target) {
+      $log.debug('source: ');
+      $log.debug(source);
+      $log.debug('target: ');
+      $log.debug(target);
     }
 
     function listStorageContent() {
@@ -87,13 +87,12 @@
     }
 
     function read(){
-      vm.readed = localStorageFactory.getObject('UUID');
+      vm.readed = localStorageFactory.getObject('UUID_FIELD');
     }
 
     function write(){
-      // vm.written =
-      localStorageFactory.store('UUID', guidFactory.getGuid());
-      vm.written = localStorageFactory.getObject('UUID');
+      localStorageFactory.store('UUID_FIELD', guidFactory.getGuid());
+      vm.written = localStorageFactory.getObject('UUID_FIELD');
     }
   }
 })();
