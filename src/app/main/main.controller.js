@@ -5,9 +5,9 @@
     .module('app')
     .controller('MainController', MainController);
 
-  MainController.$inject = ['$scope', '$log', 'guidFactory', 'localStorageFactory'];
+  MainController.$inject = ['$scope', '$window', '$log', 'guidFactory', 'localStorageFactory'];
   // /** @ngInject */
-  function MainController($scope, $log, guidFactory, localStorageFactory) {
+  function MainController($scope, $window, $log, guidFactory, localStorageFactory) {
     var vm = this;
     var CONST = {
       SOURCE_ELEMENT: 'source_element',
@@ -84,12 +84,12 @@
     }
 
     function addEventListeners() {
-      if (window.addEventListener) {
+      if ($window.addEventListener) {
         // Normal browsers
-        window.addEventListener("storage", handler, false);
+        $window.addEventListener("storage", handler, false);
       } else {
         // for IE (why make your life more difficult)
-        window.attachEvent("onstorage", handler);
+        $window.attachEvent("onstorage", handler);
       }
     }
 
