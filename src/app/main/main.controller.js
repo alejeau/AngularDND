@@ -6,10 +6,15 @@
     .controller('MainController', MainController);
 
   MainController.$inject = ['$scope', '$log', 'guidFactory', 'localStorageFactory'];
-  /** @ngInject */
+  // /** @ngInject */
   function MainController($scope, $log, guidFactory, localStorageFactory) {
     var vm = this;
+    var CONST = {
+      SOURCE_ELEMENT: 'source_element',
+      TARGET_ELEMENT: 'target_element'
+    };
 
+    addEventListeners();
     // Public variables
     vm.boxes = [];
     vm.readed = '';
@@ -21,10 +26,6 @@
     vm.dragNDropManager = dragNDropManager;
     vm.listStorageContent = listStorageContent;
     vm.clearStorageContent = clearStorageContent;
-    vm.read = read;
-    vm.write = write;
-    vm.source = null;
-    vm.target = null;
 
     // Private variables
     var CHARS = [
@@ -72,10 +73,40 @@
     function dragNDropManager(source, target) {
       vm.source = source;
       vm.target = target;
-      $log.debug('source: ');
-      $log.debug(source);
-      $log.debug('target: ');
-      $log.debug(target);
+
+      var completeSwap = swapper(source, target);
+
+      if (!completeSwap) {
+        localStorageFactory.storeJSONObject(CONST.SOURCE_ELEMENT, source);
+        localStorageFactory.storeJSONObject(CONST.TARGET_ELEMENT, target);
+      }
+      $scope.$apply();
+    }
+
+    function addEventListeners() {
+      if (window.addEventListener) {
+        // Normal browsers
+        window.addEventListener("storage", handler, false);
+      } else {
+        // for IE (why make your life more difficult)
+        window.attachEvent("onstorage", handler);
+      }
+    }
+
+    function handler(e) {
+      $log.debug('Successfully communicate with other tab');
+      $log.debug('Received data: ');
+      var source = localStorageFactory.getJSONObject(CONST.SOURCE_ELEMENT);
+      var target = localStorageFactory.getJSONObject(CONST.TARGET_ELEMENT);
+      if ((source !== null) && (target !== null)) {
+        swapper(source, target);
+        localStorageFactory.remove(CONST.SOURCE_ELEMENT);
+        localStorageFactory.remove(CONST.TARGET_ELEMENT);
+        $scope.$apply();
+      }
+    }
+
+    function swapper(source, target) {
       var sourceRank = -1, targetRank = -1;
       for (var i = 0; i < vm.boxes.length; i++) {
         if (vm.boxes[i].uuid === source.uuid) {
@@ -96,7 +127,8 @@
         $log.debug('Changing target!');
         vm.boxes[targetRank] = source;
       }
-      $scope.$apply();
+
+      return ((sourceRank === -1) && (targetRank === -1));
     }
 
     function listStorageContent() {
@@ -110,15 +142,6 @@
     function clearStorageContent() {
       $log.debug('Clearing local storage content');
       localStorageFactory.clearAll();
-    }
-
-    function read(){
-      vm.readed = localStorageFactory.getObject('UUID_FIELD');
-    }
-
-    function write(){
-      localStorageFactory.store('UUID_FIELD', guidFactory.getGuid());
-      vm.written = localStorageFactory.getObject('UUID_FIELD');
     }
   }
 })(angular);

@@ -2,6 +2,6 @@
   'use strict';
 
   angular
-    .module('app', ['ngResource', 'ngRoute', 'toastr', 'LocalStorageModule']);
+    .module('app', ['ngResource', 'ngRoute', 'toastr']);
 
 })();

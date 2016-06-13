@@ -4,7 +4,7 @@
  * @ngdoc factory
  * @name guidFactory
  *
- * @description Allows for the use of guid.
+ * @description Allows for the use of GUID (Globally Unique IDs).
  **/
 
 (function (ng) {
